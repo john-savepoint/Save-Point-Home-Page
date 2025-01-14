@@ -6,11 +6,14 @@ export default defineConfig({
   plugins: [react()],
   base: '/',
   build: {
-    sourcemap: true,
     outDir: 'dist',
     assetsDir: 'assets',
+    sourcemap: true,
     minify: 'terser',
     terserOptions: {
+      format: {
+        comments: false
+      },
       compress: {
         drop_console: false
       }
@@ -22,6 +25,7 @@ export default defineConfig({
           'three-vendor': ['three', '@react-three/fiber', '@react-three/drei']
         }
       }
-    }
+    },
+    chunkSizeWarningLimit: 1600
   }
 })
