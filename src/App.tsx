@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from './lib/utils'
 import { useEffect, useState } from 'react'
 import GlassHexagon from './components/GlassHexagon'
+import spHomeLogo from '../static/spHome_logo.svg'
 
 const App = () => {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -109,7 +110,7 @@ const App = () => {
                   }}
                 >
                   <motion.h1
-                    className="text-6xl md:text-8xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+                    className="text-6xl md:text-8xl font-bold mb-6"
                     animate={{
                       backgroundPosition: ['0%', '100%'],
                       transition: {
@@ -119,7 +120,11 @@ const App = () => {
                       }
                     }}
                   >
-                    Save Point
+                    <img
+                      src={spHomeLogo}
+                      alt="SP Home Logo"
+                      className="h-24 md:h-96 mx-auto"
+                    />
                   </motion.h1>
                 </motion.div>
                 <motion.p
@@ -254,9 +259,9 @@ const App = () => {
                   )}
                 >
                   {[
-                    { number: '10+', label: 'Years Experience' },
+                    { number: '21+', label: 'Years Experience' },
                     { number: '50+', label: 'Projects Delivered' },
-                    { number: '99%', label: 'Client Satisfaction' },
+                    { number: '100%', label: 'Client Satisfaction' },
                     { number: '24/7', label: 'Support' }
                   ].map((stat, index) => (
                     <motion.div
