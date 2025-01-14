@@ -104,7 +104,7 @@ const App = () => {
             {/* Hero Section */}
             <section className="min-h-screen flex items-center justify-center px-4">
               <motion.div
-                className="text-center"
+                className="text-center w-full"
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
@@ -116,6 +116,7 @@ const App = () => {
                     duration: 0.8,
                     ease: [0.43, 0.13, 0.23, 0.96]
                   }}
+                  className="flex justify-center"
                 >
                   <motion.h1
                     className="text-6xl md:text-8xl font-bold mb-6"
@@ -131,7 +132,7 @@ const App = () => {
                     <img
                       src={spHomeLogo}
                       alt="SP Home Logo"
-                      className="h-24 md:h-96 mx-auto"
+                      className="w-48 sm:w-72 md:w-96 lg:w-[32rem] h-auto"
                     />
                   </motion.h1>
                 </motion.div>
@@ -165,7 +166,7 @@ const App = () => {
                     className={cn(
                       'px-8 py-3 rounded-full text-lg font-semibold',
                       'bg-white text-black',
-                      'hover:bg-opacity-90 transition-all',
+                      'hover:brightness-95 transition-all',
                       'shadow-lg'
                     )}
                   >
