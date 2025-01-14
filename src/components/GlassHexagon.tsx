@@ -186,42 +186,45 @@ const GlassHexagon = () => {
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 50 }}
+      className="fixed inset-0"
+      style={{ zIndex: 50, pointerEvents: 'none' }}
     >
-      <Canvas
-        camera={{ position: [0, 0, 15], fov: 45 }}
-        gl={{
-          alpha: true,
-          antialias: true,
-          stencil: false,
-          depth: false
-        }}
-      >
-        {/* Large rotating hexagon */}
-        <HexagonShape
-          position={[8, 0, 5]}
-          scale={2.5}
-          isAnimated={true}
-          opacity={0.3}
-          rotationSpeed={0.2}
-          thickness={0.4}
-          bevelSize={0.2}
-        />
-
-        {/* Static background hexagons */}
-        {staticHexagons.map((hex, index) => (
+      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+        <Canvas
+          camera={{ position: [0, 0, 15], fov: 45 }}
+          gl={{
+            alpha: true,
+            antialias: true,
+            stencil: false,
+            depth: false
+          }}
+          style={{ pointerEvents: 'none' }}
+        >
+          {/* Large rotating hexagon */}
           <HexagonShape
-            key={index}
-            position={hex.position as [number, number, number]}
-            rotation={hex.rotation as [number, number, number]}
-            scale={hex.scale}
-            opacity={0.15}
+            position={[8, 0, 5]}
+            scale={2.5}
             isAnimated={true}
-            rotationSpeed={0.05}
+            opacity={0.3}
+            rotationSpeed={0.2}
+            thickness={0.4}
+            bevelSize={0.2}
           />
-        ))}
-      </Canvas>
+
+          {/* Static background hexagons */}
+          {staticHexagons.map((hex, index) => (
+            <HexagonShape
+              key={index}
+              position={hex.position as [number, number, number]}
+              rotation={hex.rotation as [number, number, number]}
+              scale={hex.scale}
+              opacity={0.15}
+              isAnimated={true}
+              rotationSpeed={0.05}
+            />
+          ))}
+        </Canvas>
+      </div>
     </div>
   )
 }
