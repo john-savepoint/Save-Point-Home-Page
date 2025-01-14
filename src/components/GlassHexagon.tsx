@@ -3,71 +3,88 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { shaderMaterial } from '@react-three/drei'
 
-// Enhanced glass shader with stronger refraction
 const GlassMaterial = shaderMaterial(
   {
     time: 0,
-    distortion: 0.5,
-    radius: 0.7,
-    thickness: 0.05,
-    opacity: 0.3,
-    refractionRatio: 0.8
+    distortion: 0.4,
+    radius: 1,
+    thickness: 0.1,
+    opacity: 0.2,
+    distortionScale: 0.3,
+    temporalDistortion: 0.2
   },
   // Vertex shader
   `
-    varying vec3 vPosition;
-    varying vec3 vNormal;
     varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vPosition;
     varying vec3 vViewPosition;
+    varying vec2 vScreenSpace;
+    
     void main() {
-      vPosition = position;
-      vNormal = normal;
       vUv = uv;
-      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      vNormal = normalize(normalMatrix * normal);
+      vPosition = position;
+      
+      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+      vec4 mvPosition = viewMatrix * worldPosition;
       vViewPosition = -mvPosition.xyz;
+      
       gl_Position = projectionMatrix * mvPosition;
+      vScreenSpace = gl_Position.xy / gl_Position.w;
     }
   `,
-  // Fragment shader with enhanced refraction
+  // Fragment shader
   `
     uniform float time;
     uniform float distortion;
-    uniform float radius;
-    uniform float thickness;
+    uniform float distortionScale;
+    uniform float temporalDistortion;
     uniform float opacity;
-    uniform float refractionRatio;
-    varying vec3 vPosition;
-    varying vec3 vNormal;
+    
     varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vPosition;
     varying vec3 vViewPosition;
-
+    varying vec2 vScreenSpace;
+    
+    float fresnel(vec3 eye, vec3 normal) {
+      return pow(1.0 - clamp(dot(eye, normal), 0.0, 1.0), 3.0);
+    }
+    
+    vec3 getNoise(vec2 uv) {
+      float t = time * temporalDistortion;
+      vec2 noiseUV = uv * distortionScale + vec2(sin(t), cos(t)) * 0.1;
+      float angle = (noiseUV.x + noiseUV.y) * 10.0 + t;
+      float s = sin(angle);
+      float c = cos(angle);
+      mat2 rotationMatrix = mat2(c, -s, s, c);
+      noiseUV = rotationMatrix * noiseUV;
+      
+      return vec3(
+        sin(noiseUV.x * 10.0 + t) * 0.5 + 0.5,
+        sin(noiseUV.y * 12.0 - t) * 0.5 + 0.5,
+        sin((noiseUV.x + noiseUV.y) * 11.0 + t) * 0.5 + 0.5
+      );
+    }
+    
     void main() {
-      // Calculate distance from center
-      float dist = length(vPosition.xy);
-      
-      // Create hollow effect
-      float hollow = smoothstep(radius - thickness, radius, dist) * 
-                    (1.0 - smoothstep(radius, radius + thickness, dist));
-      
-      // Enhanced Fresnel effect
       vec3 viewDirection = normalize(vViewPosition);
-      float fresnel = pow(1.0 + dot(viewDirection, vNormal), 5.0);
+      float fresnelTerm = fresnel(viewDirection, vNormal);
       
-      // Dynamic refraction
-      vec3 refraction = refract(viewDirection, normalize(vNormal), refractionRatio);
+      vec2 distortedUV = vScreenSpace + vNormal.xy * distortion * fresnelTerm;
+      vec3 noise = getNoise(distortedUV);
       
-      // Combine effects with enhanced color
       vec3 color = mix(
-        vec3(0.6, 0.8, 1.0), // Base glass color
+        vec3(0.95, 0.98, 1.0), // Base color (slight blue tint)
         vec3(1.0), // Highlight color
-        fresnel * 0.7 + abs(refraction.x) * 0.3
+        noise * fresnelTerm
       );
       
-      // Add iridescence based on viewing angle
-      float iridescence = sin(fresnel * 3.14159 + time * 0.5) * 0.15;
-      color += vec3(iridescence, iridescence * 0.8, iridescence * 1.2);
+      float alpha = mix(0.1, opacity, fresnelTerm * 0.5 + 0.2);
+      alpha *= smoothstep(0.4, 0.5, noise.x);
       
-      gl_FragColor = vec4(color, hollow * opacity + fresnel * 0.2);
+      gl_FragColor = vec4(color, alpha);
     }
   `
 )
@@ -80,6 +97,9 @@ interface HexagonProps {
   scale?: number
   isAnimated?: boolean
   opacity?: number
+  rotationSpeed?: number
+  thickness?: number
+  bevelSize?: number
 }
 
 const HexagonShape = ({
@@ -87,7 +107,10 @@ const HexagonShape = ({
   rotation = [0, 0, 0],
   scale = 1,
   isAnimated = false,
-  opacity = 0.3
+  opacity = 0.2,
+  rotationSpeed = 0.2,
+  thickness = 0.2,
+  bevelSize = 0.1
 }: HexagonProps) => {
   const materialRef = useRef<any>()
   const meshRef = useRef<THREE.Mesh>(null)
@@ -97,7 +120,7 @@ const HexagonShape = ({
       materialRef.current.time = state.clock.elapsedTime
     }
     if (meshRef.current && isAnimated) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2
+      meshRef.current.rotation.y = state.clock.elapsedTime * rotationSpeed
     }
   })
 
@@ -128,11 +151,11 @@ const HexagonShape = ({
         args={[
           hexagonShape,
           {
-            depth: 0.2,
+            depth: thickness,
             bevelEnabled: true,
-            bevelThickness: 0.1,
-            bevelSize: 0.1,
-            bevelSegments: 3
+            bevelThickness: thickness * 0.5,
+            bevelSize: bevelSize,
+            bevelSegments: 6
           }
         ]}
       />
@@ -144,34 +167,46 @@ const HexagonShape = ({
         depthWrite={false}
         blending={THREE.AdditiveBlending}
         opacity={opacity}
-        refractionRatio={0.8}
+        distortion={0.4}
+        distortionScale={0.3}
+        temporalDistortion={0.2}
       />
     </mesh>
   )
 }
 
 const GlassHexagon = () => {
-  // Define static hexagons with different positions, rotations, and scales
   const staticHexagons = [
-    { position: [-5, -3, 0], rotation: [Math.PI / 3, Math.PI / 6, 0], scale: 0.3 },
-    { position: [4, -2, 0], rotation: [Math.PI / 4, -Math.PI / 4, 0], scale: 0.4 },
-    { position: [-3, 2, 0], rotation: [-Math.PI / 6, Math.PI / 3, 0], scale: 0.25 },
-    { position: [3, 3, 0], rotation: [Math.PI / 2, Math.PI / 4, 0], scale: 0.35 },
-    { position: [0, -4, 0], rotation: [-Math.PI / 4, -Math.PI / 6, 0], scale: 0.3 }
+    { position: [-5, -3, -10], rotation: [Math.PI / 3, Math.PI / 6, 0], scale: 0.3 },
+    { position: [4, -2, -10], rotation: [Math.PI / 4, -Math.PI / 4, 0], scale: 0.4 },
+    { position: [-3, 2, -10], rotation: [-Math.PI / 6, Math.PI / 3, 0], scale: 0.25 },
+    { position: [3, 3, -10], rotation: [Math.PI / 2, Math.PI / 4, 0], scale: 0.35 },
+    { position: [0, -4, -10], rotation: [-Math.PI / 4, -Math.PI / 6, 0], scale: 0.3 }
   ]
 
   return (
-    <div className="fixed inset-0 pointer-events-none">
+    <div
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: 50 }}
+    >
       <Canvas
         camera={{ position: [0, 0, 15], fov: 45 }}
-        gl={{ alpha: true, antialias: true }}
+        gl={{
+          alpha: true,
+          antialias: true,
+          stencil: false,
+          depth: false
+        }}
       >
         {/* Large rotating hexagon */}
         <HexagonShape
-          position={[8, 0, 0]}
-          scale={2}
+          position={[8, 0, 5]}
+          scale={2.5}
           isAnimated={true}
-          opacity={0.4}
+          opacity={0.3}
+          rotationSpeed={0.2}
+          thickness={0.4}
+          bevelSize={0.2}
         />
 
         {/* Static background hexagons */}
@@ -181,7 +216,9 @@ const GlassHexagon = () => {
             position={hex.position as [number, number, number]}
             rotation={hex.rotation as [number, number, number]}
             scale={hex.scale}
-            opacity={0.2}
+            opacity={0.15}
+            isAnimated={true}
+            rotationSpeed={0.05}
           />
         ))}
       </Canvas>
