@@ -35,11 +35,6 @@ try {
   `
 }
 
-// Remove body[unresolved] styling after hydration
-const removeUnresolved = () => {
-  document.body.removeAttribute('unresolved')
-}
-
 // Add error logging
 window.addEventListener('error', (event) => {
   console.error('Global error:', event.error)

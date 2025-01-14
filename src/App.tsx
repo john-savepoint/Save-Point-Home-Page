@@ -1,24 +1,16 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from './lib/utils'
 import { useEffect, useState } from 'react'
-import GlassHexagon from './components/GlassHexagon'
-import ContactForm from './components/ContactForm'
 
 const App = () => {
   console.log('App component code starting')
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [isContactFormOpen, setIsContactFormOpen] = useState(false)
 
-  // Add more detailed logging
   useEffect(() => {
     console.log('Initial mount effect running')
     document.body.style.background = 'black' // Force black background
 
     const timer = setTimeout(() => {
       console.log('Setting loading to false')
-      setIsLoading(true)
-      setIsLoaded(true)
+      setIsLoading(false)
     }, 1000)
 
     return () => {
@@ -27,7 +19,6 @@ const App = () => {
     }
   }, [])
 
-  // Simple initial render for debugging
   if (isLoading) {
     console.log('Rendering loading state')
     return (
@@ -49,7 +40,6 @@ const App = () => {
 
   console.log('Rendering main content')
 
-  // Simplified initial render
   return (
     <div
       style={{
