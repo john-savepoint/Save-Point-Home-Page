@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from './lib/utils'
 import { useEffect, useState } from 'react'
+import GlassHexagon from './components/GlassHexagon'
 
 const App = () => {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -36,6 +37,9 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black text-white overflow-x-hidden">
+      {/* Glass Hexagon Overlay */}
+      <GlassHexagon />
+
       {/* Animated Background Elements */}
       <div className="fixed inset-0 z-0">
         {/* Gradient Orbs */}
