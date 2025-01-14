@@ -1,6 +1,12 @@
 {
   "version": "0.2",
   "language": "en",
-  "ignorePaths": ["**/*.svg"],
-  "words": ["spHome"]
+  "ignorePaths": [
+    "**/*.svg"
+  ],
+  "words": [
+    "drei",
+    "metalness",
+    "spHome"
+  ]
 }
