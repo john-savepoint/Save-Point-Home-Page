@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react'
 
 const App = () => {
-  console.log('App component code starting')
+  console.log('=== App Component Initialization ===')
   const [isLoading, setIsLoading] = useState(true)
+  console.log('Current loading state:', isLoading)
 
   useEffect(() => {
-    console.log('Initial mount effect running')
-    document.body.style.background = 'black' // Force black background
+    console.log('=== Effect Start ===')
+    console.log('Setting initial background')
+    document.body.style.background = 'black'
 
     const timer = setTimeout(() => {
-      console.log('Setting loading to false')
+      console.log('Timer fired, setting loading to false')
       setIsLoading(false)
     }, 1000)
 
     return () => {
-      console.log('Cleanup running')
+      console.log('=== Effect Cleanup ===')
       clearTimeout(timer)
     }
   }, [])
 
   if (isLoading) {
-    console.log('Rendering loading state')
+    console.log('Rendering loading state...')
     return (
       <div
         style={{
@@ -30,7 +32,13 @@ const App = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px'
+          fontSize: '24px',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9999
         }}
       >
         Loading...
@@ -38,8 +46,7 @@ const App = () => {
     )
   }
 
-  console.log('Rendering main content')
-
+  console.log('Rendering main content...')
   return (
     <div
       style={{

@@ -4,19 +4,43 @@ import App from './App.tsx'
 import './index.css'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 
-console.log('Starting application mount')
+console.log('=== Application Initialization Start ===')
+
+// Add error logging first
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', event.error)
+  document.body.innerHTML = `
+    <div style="min-height: 100vh; background: black; color: white; padding: 20px; font-family: sans-serif;">
+      <h1>Runtime Error</h1>
+      <pre style="color: red; margin-top: 20px;">${event.error?.toString()}</pre>
+    </div>
+  `
+})
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason)
+})
 
 const root = document.getElementById('root')
+console.log('Root element found:', !!root)
+
 if (!root) {
-  console.error('Root element not found')
-  throw new Error('Root element not found')
+  const error = new Error('Root element not found')
+  console.error(error)
+  document.body.innerHTML = `
+    <div style="min-height: 100vh; background: black; color: white; padding: 20px; font-family: sans-serif;">
+      <h1>Initialization Error</h1>
+      <pre style="color: red; margin-top: 20px;">${error.toString()}</pre>
+    </div>
+  `
+  throw error
 }
 
 try {
-  console.log('Creating React root')
+  console.log('Creating React root...')
   const reactRoot = ReactDOM.createRoot(root)
 
-  console.log('Rendering app')
+  console.log('Starting render...')
   reactRoot.render(
     <React.StrictMode>
       <ErrorBoundary>
@@ -24,22 +48,13 @@ try {
       </ErrorBoundary>
     </React.StrictMode>
   )
-  console.log('Render complete')
+  console.log('=== Initial render complete ===')
 } catch (error) {
-  console.error('Error mounting application:', error)
+  console.error('Fatal mounting error:', error)
   document.body.innerHTML = `
     <div style="min-height: 100vh; background: black; color: white; padding: 20px; font-family: sans-serif;">
-      <h1>Error Starting Application</h1>
+      <h1>Fatal Error</h1>
       <pre style="color: red; margin-top: 20px;">${error?.toString()}</pre>
     </div>
   `
 }
-
-// Add error logging
-window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error)
-})
-
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason)
-})
