@@ -1,100 +1,89 @@
-import { Canvas, useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
-import { Sphere, Box, OrbitControls, Float } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { RootState } from '@react-three/fiber'
+import { useRef } from 'react'
 
 const FloatingShapes = () => {
-  const groupRef = useRef<THREE.Group>(null)
+  const group = useRef<THREE.Group>(null)
 
-  useFrame((state: RootState) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.005
-      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
+  useFrame(() => {
+    if (group.current) {
+      group.current.rotation.y += 0.005
     }
   })
 
   return (
-    <group ref={groupRef}>
-      <Float
-        speed={1.5}
-        rotationIntensity={0.5}
-        floatIntensity={0.5}
+    <group ref={group}>
+      {/* Box */}
+      <mesh
+        position={[-2, 0, 0]}
+        rotation={[0.5, 0.5, 0]}
       >
-        <Box
-          args={[1, 1, 1]}
-          position={[-2, 0, 0]}
-        >
-          <meshStandardMaterial
-            color="#4338ca"
-            metalness={0.8}
-            roughness={0.2}
-          />
-        </Box>
-      </Float>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial
+          args={[
+            {
+              color: '#4299e1',
+              metalness: 0.8,
+              roughness: 0.2
+            }
+          ]}
+        />
+      </mesh>
 
-      <Float
-        speed={2}
-        rotationIntensity={0.5}
-        floatIntensity={0.5}
-      >
-        <Sphere
-          args={[0.7, 32, 32]}
-          position={[2, 0, 0]}
-        >
-          <meshStandardMaterial
-            color="#7e22ce"
-            metalness={0.8}
-            roughness={0.2}
-          />
-        </Sphere>
-      </Float>
+      {/* Sphere */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.75, 32, 32]} />
+        <meshStandardMaterial
+          args={[
+            {
+              color: '#9f7aea',
+              metalness: 0.8,
+              roughness: 0.2
+            }
+          ]}
+        />
+      </mesh>
 
-      <Float
-        speed={1.2}
-        rotationIntensity={0.3}
-        floatIntensity={0.3}
+      {/* Rotated Box */}
+      <mesh
+        position={[2, 0, 0]}
+        rotation={[1, 1, 0]}
       >
-        <Box
-          args={[0.8, 0.8, 0.8]}
-          position={[0, 2, 0]}
-          rotation={[Math.PI / 4, Math.PI / 4, 0]}
-        >
-          <meshStandardMaterial
-            color="#0ea5e9"
-            metalness={0.8}
-            roughness={0.2}
-          />
-        </Box>
-      </Float>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial
+          args={[
+            {
+              color: '#38b2ac',
+              metalness: 0.8,
+              roughness: 0.2
+            }
+          ]}
+        />
+      </mesh>
     </group>
   )
 }
 
 const Scene3D = () => {
   return (
-    <div className="h-[600px] w-full">
-      <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
-        <color
-          attach="background"
-          args={['#000000']}
-        />
-        <ambientLight intensity={0.5} />
+    <div className="w-full h-full">
+      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+        <ambientLight args={[undefined, 0.5]} />
+
         <pointLight
+          args={[undefined, 1, undefined]}
           position={[10, 10, 10]}
-          intensity={1}
         />
+
         <pointLight
+          args={[undefined, 0.5, undefined]}
           position={[-10, -10, -10]}
-          intensity={0.5}
         />
 
         <FloatingShapes />
-
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-        />
+        <OrbitControls enableZoom={false} />
       </Canvas>
     </div>
   )
