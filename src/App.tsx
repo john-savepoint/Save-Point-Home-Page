@@ -2,10 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from './lib/utils'
 import { useEffect, useState } from 'react'
 import GlassHexagon from './components/GlassHexagon'
+import ContactForm from './components/ContactForm'
 import spHomeLogo from '../static/spHome_logo.svg'
 
 const App = () => {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false)
 
   useEffect(() => {
     setIsLoaded(true)
@@ -38,6 +40,12 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black text-white overflow-x-hidden">
+      {/* Contact Form */}
+      <ContactForm
+        isOpen={isContactFormOpen}
+        onClose={() => setIsContactFormOpen(false)}
+      />
+
       {/* Glass Hexagon Overlay */}
       <GlassHexagon />
 
@@ -138,24 +146,27 @@ const App = () => {
                   className="space-x-4"
                 >
                   <motion.button
+                    onClick={() => setIsContactFormOpen(true)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={cn(
                       'px-8 py-3 rounded-full text-lg font-semibold',
                       'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500',
-                      'hover:opacity-90 transition-opacity'
+                      'hover:brightness-110 transition-all',
+                      'shadow-lg'
                     )}
                   >
                     Explore Our Solutions
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.2)' }}
+                    onClick={() => setIsContactFormOpen(true)}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={cn(
                       'px-8 py-3 rounded-full text-lg font-semibold',
-                      'bg-white/10 backdrop-blur-sm',
-                      'hover:bg-white/20 transition-colors',
-                      'border border-white/20'
+                      'bg-white text-black',
+                      'hover:bg-opacity-90 transition-all',
+                      'shadow-lg'
                     )}
                   >
                     Learn More
@@ -326,12 +337,14 @@ const App = () => {
                     Let's build something amazing together
                   </motion.p>
                   <motion.button
+                    onClick={() => setIsContactFormOpen(true)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={cn(
                       'px-8 py-3 rounded-full text-lg font-semibold',
                       'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500',
-                      'hover:opacity-90 transition-opacity'
+                      'hover:brightness-110 transition-all',
+                      'shadow-lg'
                     )}
                   >
                     Get in Touch
