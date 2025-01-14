@@ -6,8 +6,18 @@ import ContactForm from './components/ContactForm'
 import spHomeLogo from '../static/spHome_logo.svg'
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isContactFormOpen, setIsContactFormOpen] = useState(false)
+
+  useEffect(() => {
+    console.log('App component mounted')
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+      console.log('Loading complete')
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     setIsLoaded(true)
@@ -36,6 +46,14 @@ const App = () => {
         ease: 'easeInOut'
       }
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-2xl">Loading...</div>
+      </div>
+    )
   }
 
   return (

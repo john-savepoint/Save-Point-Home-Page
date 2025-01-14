@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: './',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -15,7 +15,8 @@ export default defineConfig({
         comments: false
       },
       compress: {
-        drop_console: false
+        drop_console: false,
+        passes: 2
       }
     },
     rollupOptions: {
@@ -23,9 +24,17 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'three-vendor': ['three', '@react-three/fiber', '@react-three/drei']
-        }
+        },
+        inlineDynamicImports: false
       }
     },
-    chunkSizeWarningLimit: 1600
+    chunkSizeWarningLimit: 1600,
+    cssCodeSplit: true,
+    modulePreload: {
+      polyfill: true
+    }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei']
   }
 })
