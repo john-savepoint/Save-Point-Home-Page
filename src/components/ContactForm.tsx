@@ -21,43 +21,31 @@ const ContactForm = ({ isOpen, onClose }: ContactFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setIsSubmitted(true)
 
-    try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          access_key: '8fa24e44-9f85-4831-9082-b8772627e673',
-          name: formData.name,
-          email: formData.email,
-          company: formData.company,
-          message: formData.message,
-          to: 'john@savepoint.com.au'
-        })
+    // Wait for the full animation sequence to complete (7 seconds)
+    setTimeout(() => {
+      setFormData({
+        name: '',
+        email: '',
+        company: '',
+        message: ''
       })
-
-      if (response.ok) {
-        setFormData({ name: '', email: '', company: '', message: '' })
-        setIsSubmitted(true)
-
-        // Reset form and close after the TV effect
-        setTimeout(() => {
-          setIsSubmitted(false)
-          onClose()
-        }, 3000)
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error)
-    }
-
-    setIsSubmitting(false)
+      setIsSubmitting(false)
+      setIsSubmitted(false)
+      onClose()
+    }, 7000)
   }
 
   return (
     <>
-      <RetroTVEffect isActive={isSubmitted} />
+      <RetroTVEffect
+        isActive={isSubmitted}
+        onAnimationComplete={() => {
+          setIsSubmitted(false)
+          onClose()
+        }}
+      />
 
       <AnimatePresence>
         {isOpen && !isSubmitted && (

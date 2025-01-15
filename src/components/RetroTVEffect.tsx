@@ -8,79 +8,79 @@ interface RetroTVEffectProps {
 
 const RetroTVEffect = ({ isActive, onAnimationComplete }: RetroTVEffectProps) => {
   const [showText, setShowText] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     if (isActive) {
-      document.body.style.overflow = 'hidden'
-      // Show text after the screen effect
-      const timer = setTimeout(() => {
-        setShowText(true)
-      }, 1000) // 1 second after effect starts
+      setIsVisible(true)
+      // Delay showing text until after the screen effects
+      setTimeout(() => setShowText(true), 2000)
 
-      // Hide text and complete after 6 seconds total (1s effect + 5s display)
-      const completeTimer = setTimeout(() => {
+      // Start fade out after 7 seconds (2s delay + 5s display)
+      setTimeout(() => {
         setShowText(false)
+        setIsVisible(false)
         onAnimationComplete?.()
-      }, 6000)
-
-      return () => {
-        document.body.style.overflow = ''
-        clearTimeout(timer)
-        clearTimeout(completeTimer)
-      }
+      }, 7000)
+    } else {
+      setShowText(false)
+      setIsVisible(false)
     }
   }, [isActive, onAnimationComplete])
 
   return (
     <AnimatePresence>
-      {isActive && (
+      {isVisible && (
         <>
-          {/* White flash and vertical collapse */}
-          <motion.div
-            className="fixed inset-0 bg-white z-[999] origin-[center_center]"
-            initial={{ scaleY: 1 }}
-            animate={{
-              scaleY: 0.01,
-              backgroundColor: ['#fff', '#fff', '#000'],
-              transition: {
-                duration: 0.5,
-                times: [0, 0.1, 1],
-                ease: [0.4, 0, 0.2, 1]
-              }
-            }}
-          >
-            {/* Horizontal collapse */}
-            <motion.div
-              className="absolute inset-0 bg-white"
-              initial={{ scaleX: 1 }}
-              animate={{
-                scaleX: 0,
-                transition: {
-                  duration: 0.3,
-                  delay: 0.5,
-                  ease: [0.4, 0, 0.2, 1]
-                }
-              }}
-            />
-          </motion.div>
-
-          {/* Black background */}
+          {/* Black background layer */}
           <motion.div
             className="fixed inset-0 bg-black z-[998]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.1, delay: 0.8 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
           />
 
-          {/* Message */}
+          {/* White flash layer */}
+          <motion.div
+            className="fixed inset-0 bg-white z-[999]"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 1, 0],
+              transition: {
+                duration: 0.5,
+                times: [0, 0.1, 1]
+              }
+            }}
+          />
+
+          {/* Screen collapse effect */}
+          <motion.div
+            className="fixed inset-0 bg-white z-[999]"
+            initial={{
+              scaleY: 1,
+              scaleX: 1
+            }}
+            animate={{
+              scaleY: [1, 0.005, 0.005, 0],
+              scaleX: [1, 1, 0, 0]
+            }}
+            transition={{
+              duration: 1,
+              times: [0, 0.5, 0.8, 1],
+              ease: 'easeInOut'
+            }}
+          />
+
+          {/* Thank you message */}
           <AnimatePresence>
             {showText && (
               <motion.div
-                className="fixed inset-0 z-[1000] flex items-center justify-center"
+                className="fixed inset-0 flex items-center justify-center z-[999] text-white"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.5 }}
               >
                 <div className="text-center">
                   <motion.h2
