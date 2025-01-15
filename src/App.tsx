@@ -47,7 +47,9 @@ const App = () => {
       />
 
       {/* Glass Hexagon Overlay */}
-      <GlassHexagon />
+      <div className="fixed inset-0 z-0">
+        <GlassHexagon />
+      </div>
 
       {/* Animated Background Elements */}
       <div className="fixed inset-0 z-0">
@@ -153,6 +155,7 @@ const App = () => {
                     className={cn(
                       'px-8 py-3 rounded-full text-lg font-semibold',
                       'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500',
+                      'bg-opacity-100',
                       'hover:brightness-110 transition-all',
                       'shadow-lg'
                     )}
