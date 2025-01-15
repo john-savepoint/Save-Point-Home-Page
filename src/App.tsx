@@ -142,7 +142,7 @@ const App = () => {
                   variants={fadeInUp}
                   className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto"
                 >
-                  Pioneering the future through innovative technology solutions
+                  Making high-end technology accessible and affordable for everyone
                 </motion.p>
                 <motion.div
                   variants={fadeInUp}
@@ -366,7 +366,7 @@ const App = () => {
               className="py-8 px-4 border-t border-white/10"
             >
               <div className="max-w-6xl mx-auto text-center text-gray-400">
-                <p>© 2024 Save Point Proprietary Limited. All rights reserved.</p>
+                <p>© {new Date().getFullYear()} Save Point Proprietary Limited. All rights reserved.</p>
               </div>
             </motion.footer>
           </motion.div>
