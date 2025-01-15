@@ -11,7 +11,9 @@ const GlassMaterial = shaderMaterial(
     thickness: 0.1,
     opacity: 0.2,
     distortionScale: 0.3,
-    temporalDistortion: 0.2
+    temporalDistortion: 0.2,
+    blurStrength: 0.8,
+    chromaticAberration: 0.05
   },
   // Vertex shader
   `
@@ -41,6 +43,8 @@ const GlassMaterial = shaderMaterial(
     uniform float distortionScale;
     uniform float temporalDistortion;
     uniform float opacity;
+    uniform float blurStrength;
+    uniform float chromaticAberration;
     
     varying vec2 vUv;
     varying vec3 vNormal;
@@ -49,40 +53,60 @@ const GlassMaterial = shaderMaterial(
     varying vec2 vScreenSpace;
     
     float fresnel(vec3 eye, vec3 normal) {
-      return pow(1.0 - clamp(dot(eye, normal), 0.0, 1.0), 3.0);
+      return pow(1.0 - clamp(dot(eye, normal), 0.0, 1.0), 4.0);
     }
     
     vec3 getNoise(vec2 uv) {
       float t = time * temporalDistortion;
       vec2 noiseUV = uv * distortionScale + vec2(sin(t), cos(t)) * 0.1;
+      
+      // Improved noise pattern
       float angle = (noiseUV.x + noiseUV.y) * 10.0 + t;
       float s = sin(angle);
       float c = cos(angle);
       mat2 rotationMatrix = mat2(c, -s, s, c);
       noiseUV = rotationMatrix * noiseUV;
       
-      return vec3(
-        sin(noiseUV.x * 10.0 + t) * 0.5 + 0.5,
-        sin(noiseUV.y * 12.0 - t) * 0.5 + 0.5,
-        sin((noiseUV.x + noiseUV.y) * 11.0 + t) * 0.5 + 0.5
-      );
+      // Multi-layered noise for more natural glass look
+      vec3 noise1 = vec3(
+        sin(noiseUV.x * 10.0 + t),
+        sin(noiseUV.y * 12.0 - t),
+        sin((noiseUV.x + noiseUV.y) * 11.0 + t)
+      ) * 0.5 + 0.5;
+      
+      vec3 noise2 = vec3(
+        sin(noiseUV.x * 15.0 - t * 1.1),
+        sin(noiseUV.y * 17.0 + t * 0.9),
+        sin((noiseUV.x - noiseUV.y) * 13.0 - t)
+      ) * 0.5 + 0.5;
+      
+      return mix(noise1, noise2, 0.5);
     }
     
     void main() {
       vec3 viewDirection = normalize(vViewPosition);
       float fresnelTerm = fresnel(viewDirection, vNormal);
       
-      vec2 distortedUV = vScreenSpace + vNormal.xy * distortion * fresnelTerm;
-      vec3 noise = getNoise(distortedUV);
+      // Enhanced distortion with chromatic aberration
+      vec2 distortedUV = vScreenSpace + vNormal.xy * distortion * (fresnelTerm + 0.2);
+      vec3 noiseR = getNoise(distortedUV + vec2(chromaticAberration, 0.0));
+      vec3 noiseG = getNoise(distortedUV);
+      vec3 noiseB = getNoise(distortedUV - vec2(chromaticAberration, 0.0));
       
+      vec3 noise = vec3(noiseR.r, noiseG.g, noiseB.b);
+      
+      // Improved color blending
+      vec3 baseColor = vec3(0.95, 0.98, 1.0);
+      vec3 highlightColor = vec3(1.0);
       vec3 color = mix(
-        vec3(0.95, 0.98, 1.0), // Base color (slight blue tint)
-        vec3(1.0), // Highlight color
-        noise * fresnelTerm
+        baseColor,
+        highlightColor,
+        noise * fresnelTerm * blurStrength
       );
       
-      float alpha = mix(0.1, opacity, fresnelTerm * 0.5 + 0.2);
-      alpha *= smoothstep(0.4, 0.5, noise.x);
+      // Smoother opacity transition
+      float alpha = mix(0.1, opacity, smoothstep(0.2, 0.8, fresnelTerm * 0.5 + 0.3));
+      alpha *= smoothstep(0.3, 0.7, (noise.x + noise.y + noise.z) / 3.0);
       
       gl_FragColor = vec4(color, alpha);
     }
@@ -155,7 +179,7 @@ const HexagonShape = ({
             bevelEnabled: true,
             bevelThickness: thickness * 0.5,
             bevelSize: bevelSize,
-            bevelSegments: 6
+            bevelSegments: 8
           }
         ]}
       />
@@ -165,11 +189,16 @@ const HexagonShape = ({
         transparent
         side={THREE.DoubleSide}
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        blending={THREE.CustomBlending}
+        blendEquation={THREE.AddEquation}
+        blendSrc={THREE.SrcAlphaFactor}
+        blendDst={THREE.OneMinusSrcAlphaFactor}
         opacity={opacity}
-        distortion={0.4}
-        distortionScale={0.3}
-        temporalDistortion={0.2}
+        distortion={0.5}
+        distortionScale={0.4}
+        temporalDistortion={0.15}
+        blurStrength={0.8}
+        chromaticAberration={0.05}
       />
     </mesh>
   )
